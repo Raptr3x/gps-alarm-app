@@ -8,7 +8,7 @@ AppPage {
     // Dummy data for the list
     property var allAlarms: [
         {"id":1, "title":"Test 1", "center":"CenterObj", "radius":100, "latitude": 50.123, "longitude": -22.51, "active": true},
-        {"id":2, "title":"Test 2", "center":"CenterObj", "radius":100, "latitude": 50.123, "longitude": -22.51, "active": true}
+        {"id":2, "title":"Test 2", "center":"CenterObj", "radius":100, "latitude": 50.123, "longitude": -22.51, "active": false}
     ]
 
     // specific model for json data
@@ -45,5 +45,6 @@ AppPage {
         anchors.right: parent.right
         anchors.bottomMargin:10
         anchors.rightMargin: 10
+        onClicked: mainPage.navigationStack.push(alarmMapPage)
     }
 }

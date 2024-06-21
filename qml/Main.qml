@@ -11,4 +11,11 @@ App {
         id: mainNavigationStack
         initialPage: AlarmListPage { }
     }
+
+    Component {
+        id: alarmMapPage
+        AlarmMapPage {
+
+        }
+    }
 }
