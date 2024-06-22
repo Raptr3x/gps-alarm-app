@@ -1,43 +1,52 @@
 import Felgo
 import QtQuick
-import "pages"
-// we had to import new directories
-import "models"
-import "logic"
+import QtMultimedia
+import QtPositioning
+import "./pages"
+import "./logic"
+import "./models"
 
 App {
     id: app
 
-    // when App loads, we will request all alarms from the database
     Component.onCompleted: {
         logic.getAllAlarms()
 //        app.settings.clearAll()
-
     }
 
-    // Other pages will be displayed by appending them to this stack
-    // And closed by removing them as well
-    NavigationStack {
-        id: mainNavigationStack
-        initialPage: AlarmListPage { }
+    SoundManager {
+        id: soundManager
     }
 
-    Component {
-        id: alarmMapPage
-        AlarmMapPage {
+    AlarmRing {
+        id: alarmRingPage
+    }
 
+    NavigationBar {
+        rightBarItem: NavigationBarRow{
+            id: switchButton
+        }
+    }
+    // used to trigger alarm
+    PositionSource {
+        id: positionSource
+        active: true
+        onPositionChanged: {
+            var currentPosition = positionSource.position.coordinate
         }
     }
 
-    // add Logic and DataModel components with their ids so they can be referenced later
-    Logic {
-        id: logic
+    NavigationStack {
+        id: mainNavigationStack
+        initialPage: AlarmsListPage { }
     }
 
     DataModel {
         id: dataModel
-        dispatcher: logic // used for signal handlers
+        dispatcher: logic
     }
 
-
+    Logic {
+        id: logic
+    }
 }
