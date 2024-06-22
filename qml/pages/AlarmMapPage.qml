@@ -16,6 +16,38 @@ AppPage {
                 logic.toggleAlarm(alarmId, alarmSwitch.checked)
             }
         }
+        // we add a trash can button with a prompt if user wants to delete it
+        IconButtonBarItem {
+            iconType: IconType.trash
+            iconSize: 25
+            onClicked: {
+                NativeUtils.displayMessageBox("Are you sure you want to delete this alarm?", "", 2)
+            }
+        }
+    }
+
+    // When page is loaded, we run a script to populate the page with needed data
+    Component.onCompleted: {
+        // could also be set in private var and then moved to the UI. this was just faster
+        if(alarmMapPage.alarmId !== 0) {
+            // populate UI if user is updating existing alarm
+            var alarmDetails = dataModel.getAlarmDetails(alarmMapPage.alarmId)
+            alarmMapPage.title = alarmDetails.title
+            radiusSlider.value = alarmDetails.radius
+            alarmSwitch.checked = alarmDetails.active
+            circle.center = QtPositioning.coordinate(alarmDetails.latitude, alarmDetails.longitude)
+            map.center = circle.center
+            map.zoomLevel = (16 - Math.log(alarmDetails.radius/300)/Math.log(2))
+        } else{
+            alarmMapPage.title = "New Alarm"
+            alarmSwitch.checked = true
+        }
+
+        // Fix the ugly translucent background on IOS button
+        if(Theme.isIos){
+            useThisLocBtn.flat = false
+            useThisLocBtn.backgroundColor = "white"
+        }
     }
 
     // creating the map over the whole page
@@ -114,6 +146,7 @@ AppPage {
 
     // buttom right of the map, button to create the alarm with set values
     AppButton {
+        id: useThisLocBtn
         text: "Use this location"
         anchors.bottom: parent.bottom
         anchors.right: parent.right
@@ -142,6 +175,18 @@ AppPage {
         // We use connections component to handle signals from NativeUtils
         target: NativeUtils
 
+
+        onMessageBoxFinished:
+            accepted => {
+                // when deleting an alarm and prompt is accepted, this send signals to remove and update the view list
+                if(accepted){
+                    logic.removeAlarm(alarmId)
+                }
+                logic.getAllAlarms()
+                // move back to listView by removing everything from the navigation stack except first page
+                alarmMapPage.navigationStack.popAllExceptFirst()
+        }
+
         // After we enter a name for the alarm, we need to gather all data, build a json obj and store it by sending signal
         onTextInputFinished:
             (accepted, alarmName) => {
@@ -156,7 +201,13 @@ AppPage {
                         active: alarmSwitch.checked
                     }
                     // send signals to store and update the view list
-                    logic.storeAlarm(newAlarm)
+                    if(alarmId > 0){
+                        newAlarm.id = alarmId
+                        logic.updateAlarm(alarmId, newAlarm)
+                    } else {
+                        logic.storeAlarm(newAlarm)
+                    }
+
                     logic.getAllAlarms()
                     // move back to listView by removing everything from the navigation stack except first page
                     alarmMapPage.navigationStack.popAllExceptFirst()

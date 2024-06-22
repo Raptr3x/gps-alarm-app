@@ -24,6 +24,8 @@ AppPage {
         delegate: SimpleRow { // each iterated object is displayed using SimpleRow
             text: model.title // we can access the json object using "model" keyword
             detailText: "Alarm is ".concat(model.active ? "on" : "off")
+            // when alarm from list selected, open map and pass in it's id using model keyword
+            onSelected: mainPage.navigationStack.push(alarmMapPage, { alarmId: model.id })
         }
     }
 
