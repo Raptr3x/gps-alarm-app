@@ -5,16 +5,12 @@ AppPage {
     id: mainPage
     title: "GPS Alarm App"
 
-    // Dummy data for the list
-    property var allAlarms: [
-        {"id":1, "title":"Test 1", "center":"CenterObj", "radius":100, "latitude": 50.123, "longitude": -22.51, "active": true},
-        {"id":2, "title":"Test 2", "center":"CenterObj", "radius":100, "latitude": 50.123, "longitude": -22.51, "active": false}
-    ]
 
     // specific model for json data
     JsonListModel {
         id: listModel
-        source: mainPage.allAlarms // list of json objects which we will iterate later
+        // instead of dummy data, now we call them from the database
+        source: dataModel.allAlarms
         keyField: "id"
         // all fields we're giving access to in the source json
         fields: ["id", "title", "center", "radius", "latitude", "longitude", "active"]
@@ -32,11 +28,10 @@ AppPage {
     }
 
     AppText {
-        text: "No alarms yet. Create a new alarm!"
         anchors.verticalCenter: parent.verticalCenter
         anchors.horizontalCenter: parent.horizontalCenter
-        width: parent.width
-        visible: !allAlarms // if allAlarms is empty, we don't display this element
+        text: "No alarms yet. Create a new alarm!"
+        visible: !dataModel.allAlarms.length // if allAlarms is empty, we don't display this element
     }
 
     AppButton {

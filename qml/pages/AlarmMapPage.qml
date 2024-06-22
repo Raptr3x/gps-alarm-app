@@ -6,6 +6,17 @@ import QtQuick.Controls
 
 AppPage {
     id: alarmMapPage
+    property int alarmId: 0
+
+    rightBarItem: NavigationBarRow {
+        Switch {
+            id: alarmSwitch
+            anchors.verticalCenter: parent.verticalCenter
+            onClicked: {
+                logic.toggleAlarm(alarmId, alarmSwitch.checked)
+            }
+        }
+    }
 
     // creating the map over the whole page
     AppMap {
@@ -125,4 +136,32 @@ AppPage {
             }
         }
     }
+
+    Connections {
+
+        // We use connections component to handle signals from NativeUtils
+        target: NativeUtils
+
+        // After we enter a name for the alarm, we need to gather all data, build a json obj and store it by sending signal
+        onTextInputFinished:
+            (accepted, alarmName) => {
+                if(accepted) {
+                    var newAlarm = {
+                        id: '', //will be assigend later when latest id is known
+                        title: alarmName,
+                        center: circle.center,
+                        radius: radiusSlider.value,
+                        latitude: circle.center.latitude,
+                        longitude: circle.center.longitude,
+                        active: alarmSwitch.checked
+                    }
+                    // send signals to store and update the view list
+                    logic.storeAlarm(newAlarm)
+                    logic.getAllAlarms()
+                    // move back to listView by removing everything from the navigation stack except first page
+                    alarmMapPage.navigationStack.popAllExceptFirst()
+                }
+        }
+    }
+
 }
